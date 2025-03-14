@@ -97,6 +97,16 @@ def get_user_data(user_id):
         SELECT active, created_at, trial_plan, trusting, t1, t2, t3, t4, admin 
         FROM Users WHERE user_id = ? 
     """, (user_id,))
+
+    admin_id = int(os.getenv('adminID')) if os.getenv('adminID') else None
+    if user_id == admin_id:
+        cursor.execute("UPDATE Users SET admin = 1 WHERE user_id = ?", (user_id,))
+        conn.commit()
+    
+    cursor.execute("""  
+        SELECT active, created_at, trial_plan, trusting, t1, t2, t3, t4, admin 
+        FROM Users WHERE user_id = ? 
+    """, (user_id,))
     
     user = cursor.fetchone()
     conn.close()
@@ -108,10 +118,10 @@ def get_user_data(user_id):
             "Дата регистрации": get_user_time_registration(user[1]),
             "Триал-план": "Да" if user[2] == 1 else "Нет",
             "Доверие": user[3],
-            "T1": user[4],
-            "T2": user[5],
-            "T3": user[6],
-            "T4": user[7],
+            "Подписка на 3 дня": user[4],
+            "Подписка на 7 дней": user[5],
+            "Подписка на 30 дней": user[6],
+            "Подписка на 365 дней": user[7],
             "Админ": "Да" if user[8] == 1 else "Нет",
         }
     return None
@@ -119,6 +129,10 @@ def get_user_data(user_id):
 # Функция получения времени регистрации пользователя
 def get_user_time_registration(created_at):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(created_at))
+
+
+#def set
+
 
 # Функция для вычисления времени до окончания триал-подписки
 def calculate_remaining_time(user_id):
@@ -134,7 +148,7 @@ def calculate_remaining_time(user_id):
         current_time = int(time.time())
         difference = current_time - registration_time
         
-        if difference >= 3 * 24 * 3600:  # 3 days in seconds
+        if difference >= 3 * 24 * 3600:  # 3 дня в секундах
             remaining_time = 0
         else:
             remaining_time = 3 * 24 * 3600 - difference

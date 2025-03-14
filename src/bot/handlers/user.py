@@ -15,31 +15,60 @@ from keyboards.reply import cmd_b
 
 
 
-
-
-
 @dp.message(CommandStart())
 async def start(message: Message):
     user_id = message.from_user.id
     user_data = get_user_data(user_id)  # Получаем данные пользователя
     
     if user_data:  
-        await message.answer("Добро пожаловать в бот Meow Фриланс!\n\n"
+
+        await message.answer("Добро пожаловать в бот Meow Фриланс!😻\n\n"
                              "🚀 Найдите клиентов быстро, удобно и просто!\n\n"
                              "Для получения дополнительной информации напишите /help.\n\n"
                             "Для выхода в личный кабинет напишите /me")
         
         await message.answer("❕️ Нажмите /Vacancies, чтобы начать получать вакансии")
+
+        await message.answer_photo(
+types.FSInputFile(path="src\\bot\\media\\botDescription.png"),
+caption=f"⏳ Оставшееся время действия Вашей подписки: \n{calculate_remaining_time(user_id)}"
+)
     else:
         add_user(user_id)  # Добавляем пользователя в БД
-        await message.answer("Добро пожаловать! Вы зарегистрированы в системе.")
+        await message.answer("Добро пожаловать в бот Meow Фриланс!😻\nВы зарегистрированы в системе.")
 
-        await message.answer("Профессия «Веб-Дизайнер» выбрана успешно. Следуйте инструкции ниже")
+        await message.answer("🚀 Найдите клиентов быстро, удобно и просто!\n\n"
+                             "Для получения дополнительной информации напишите /help.\n\n"
+                            "Для выхода в личный кабинет напишите /me")
+        
+        await message.answer_photo(
+types.FSInputFile(path="src\\bot\\media\\botDescription.png"),
+caption=f"⏳ Оставшееся время действия Вашей подписки: \n{calculate_remaining_time(user_id)}"
+)
+        
 
-        welcome_text = """
-❕️ Нажмите /vacancies, чтобы начать получать вакансии\n❕️ Нажмите /info, чтобы начать получать вакансии"""
+        
+@dp.message(Command("help"))
+async def start(message: Message):
+    await message.answer("Список команд:\n\n"
+                             "/start - начать\n\n"
+                             "/me - личный кабинет\n\n"
+                             "/Vacancies - команда для получения вакансий")
 
-        await message.answer(welcome_text, reply_markup = cmd_b.admin())
+
+
+@dp.message(Command("me"))
+async def infor(message: types.Message):
+    user_id = message.from_user.id
+    add_user(user_id)  # Добавляем пользователя в БД, если его нет
+    user_data = get_user_data(user_id)  # Получаем данные пользователя
+    
+    if user_data:
+        response = "\n".join([f"📌 {key}: {value}" for key, value in user_data.items()])
+    else:
+        response = "❌ Ошибка: данные не найдены."
+
+    await message.answer(f"✅ Личный кабинет:\n\n{response}")
 
 
 
@@ -70,7 +99,7 @@ async def vacancies(message: types.Message):
 
 
 
-@dp.message(Command("info"))
+@dp.message(Command("me"))
 async def infor(message: types.Message):
     user_id = message.from_user.id
     add_user(user_id)  # Добавляем пользователя в БД, если его нет
@@ -93,20 +122,29 @@ async def infor(message: types.Message):
 
 
 
-
-
-@dp.callback_query(F.data == 'subscribe')
-async def twenty_seven(callback: CallbackQuery):
+@dp.callback_query(lambda c: c.data == 'subscribe')
+async def handle_subscribe(callback: types.CallbackQuery):
     await callback.answer('Введите ключи')
-    await callback.message.answer(f'Выберите user ID', reply_markup=menu.defShowBotAdminMenu())
+    await callback.message.answer(
+        'Пожалуйста, перешлите сообщение от пользователя, чтобы получить его ID.'
+    )
+
+# Забираем user id из пересланного сообщения
+@dp.message()
+async def process_message(message: types.Message):
+    if message.forward_from:
+        user_id = message.forward_from.id
+        if get_user_data(user_id):  # Используем реальное имя вашей функции
+            await message.answer(f"Получен пересланный ID пользователя: {user_id}. Пользователь есть в базе данных.")
+            await message.answer("Выберите период подписки для пользователя: ", reply_markup=menu.defShowBotAdminSelectSub())
+        else:
+            await message.answer(f"Получен пересланный ID пользователя: {user_id}. Пользователя нет в базе данных.")
+    elif message.reply_to_message and "Пожалуйста, перешлите сообщение" in message.reply_to_message.text:
+        await message.answer("Пожалуйста, перешлите сообщение от пользователя, а не отправляйте обычный текст.")
 
 
-#========
-""" @dp.callback_query_handler(Text(startswith='subscribe'))
-async def rSub(call: types.CallbackQuery):
-    await call.answer()
-    await call.message.delete()
-    await bot.send_message(call.from_user.id, f'Выберите user ID', reply_markup=menu.defShowBotAdminMenu()) """
+
+
 
 @dp.message()
 async def echo(message: types.Message):
