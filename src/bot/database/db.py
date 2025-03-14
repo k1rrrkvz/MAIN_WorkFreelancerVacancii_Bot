@@ -1,5 +1,6 @@
 # db.py
 
+import datetime
 import os
 from dotenv import load_dotenv
 import sqlite3
@@ -33,7 +34,9 @@ def create_table():
             "t2" INTEGER DEFAULT 0, 
             "t3" INTEGER DEFAULT 0, 
             "t4" INTEGER DEFAULT 0, 
-            "admin" INTEGER DEFAULT 0 
+            "admin" INTEGER DEFAULT 0,
+                   
+            "subscription_end" INTEGER DEFAULT 0
         ) 
     ''')
     
@@ -130,8 +133,100 @@ def get_user_data(user_id):
 def get_user_time_registration(created_at):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(created_at))
 
+# подписка на 3 дня
+def setSubFor_3_days(user_id):
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("""
+            UPDATE Users 
+            SET t1 = 1
+            WHERE user_id = ?
+        """, (user_id,))
+        
+        conn.commit()
+        
+        if cursor.rowcount > 0:
+            return f"Подписка на 3 дня успешно установлена для пользователя {user_id}"
+        else:
+            return f"Пользователь с ID {user_id} не найден"
+    
+    finally:
+        conn.close()
 
-#def set
+# подписка на 7 дней
+
+def setSubFor_7_days(user_id):
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("""
+            UPDATE Users 
+            SET t2 = 1
+            WHERE user_id = ?
+        """, (user_id,))
+        
+        conn.commit()
+        
+        if cursor.rowcount > 0:
+            return f"Подписка на 3 дня успешно установлена для пользователя {user_id}"
+        else:
+            return f"Пользователь с ID {user_id} не найден"
+    
+    finally:
+        conn.close()
+
+# подписка на 30 дней
+
+def setSubFor_30_days(user_id):
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("""
+            UPDATE Users 
+            SET t3 = 1
+            WHERE user_id = ?
+        """, (user_id,))
+        
+        conn.commit()
+        
+        if cursor.rowcount > 0:
+            return f"Подписка на 3 дня успешно установлена для пользователя {user_id}"
+        else:
+            return f"Пользователь с ID {user_id} не найден"
+    
+    finally:
+        conn.close()
+
+# подписка на 365 дней
+
+def setSubFor_365_days(user_id):
+    conn = connect_db()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("""
+            UPDATE Users 
+            SET t3 = 1
+            WHERE user_id = ?
+        """, (user_id,))
+        
+        conn.commit()
+        
+        if cursor.rowcount > 0:
+            return f"Подписка на 3 дня успешно установлена для пользователя {user_id}"
+        else:
+            return f"Пользователь с ID {user_id} не найден"
+    
+    finally:
+        conn.close()
+
+
+#---------------------------------
+
 
 
 # Функция для вычисления времени до окончания триал-подписки

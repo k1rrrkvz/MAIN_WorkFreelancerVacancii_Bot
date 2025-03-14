@@ -5,13 +5,23 @@ from aiogram.types import Message
 
 from aiogram import types, F
 from aiogram.types import CallbackQuery
+
+from aiogram import Bot, Dispatcher, types
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.types import Message
+
 from loader import dp, bot
 
 from keyboards.inline import menu   
 
-from database.db import add_user, get_user_data, update_trial_plan_for_user, calculate_remaining_time, get_user_time_registration, is_trial_plan_active, get_user_row_number
+from database.db import add_user, get_user_data, update_trial_plan_for_user, calculate_remaining_time, get_user_time_registration, is_trial_plan_active, get_user_row_number, setSubFor_3_days
 from keyboards.reply import cmd_b
 #from handlers.admin import admin_panel
+
+# Определяем группу состояний
+class SubscriptionStates(StatesGroup):
+    waiting_for_subscription = State()
 
 
 
@@ -122,7 +132,7 @@ async def infor(message: types.Message):
 
 
 
-@dp.callback_query(lambda c: c.data == 'subscribe')
+""" @dp.callback_query(lambda c: c.data == 'subscribe')
 async def handle_subscribe(callback: types.CallbackQuery):
     await callback.answer('Введите ключи')
     await callback.message.answer(
@@ -142,7 +152,55 @@ async def process_message(message: types.Message):
     elif message.reply_to_message and "Пожалуйста, перешлите сообщение" in message.reply_to_message.text:
         await message.answer("Пожалуйста, перешлите сообщение от пользователя, а не отправляйте обычный текст.")
 
+ """
 
+@dp.callback_query(lambda c: c.data == 'subscribe')
+async def handle_subscribe(callback: types.CallbackQuery):
+    await callback.answer('Введите ключи')
+    await callback.message.answer(
+        'Пожалуйста, перешлите сообщение от пользователя, чтобы получить его ID.'
+    )
+
+@dp.message()
+async def process_message(message: types.Message, state: FSMContext):
+    if message.forward_from:
+        user_id = message.forward_from.id
+        if get_user_data(user_id):  # Используем реальное имя вашей функции
+            await message.answer(f"Получен пересланный ID пользователя: {user_id}. Пользователь есть в базе данных.")
+            await message.answer("Выберите период подписки для пользователя: ", reply_markup=menu.defShowBotAdminSelectSub())
+            # Сохраняем ID пользователя в состоянии
+            await state.set_state(SubscriptionStates.waiting_for_subscription)
+            await state.update_data(user_id=user_id)
+        else:
+            await message.answer(f"Получен пересланный ID пользователя: {user_id}. Пользователя нет в базе данных.")
+    elif message.reply_to_message and "Пожалуйста, перешлите сообщение" in message.reply_to_message.text:
+        await message.answer("Пожалуйста, перешлите сообщение от пользователя, а не отправляйте обычный текст.")
+        
+
+@dp.callback_query(lambda c: c.data == '3_days')
+async def handle_3_days_subscription(callback: types.CallbackQuery, state: FSMContext):
+    # Получаем сохраненный ID пользователя из состояния
+    data = await state.get_data()
+    user_id = data.get('user_id')
+    
+    if user_id:
+        # Вызываем функцию для установки подписки
+        result = setSubFor_3_days(user_id)
+        
+        # Отправляем мгновенное уведомление пользователю
+        await callback.answer("Подписка обновлена", show_alert=True)
+        
+        # Отправляем подробный результат в чат
+        await callback.message.answer(result)
+        
+        # Сбрасываем состояние
+        await state.clear()
+    else:
+        await callback.answer("Ошибка: ID пользователя не найден", show_alert=True)
+        await callback.message.answer("Пожалуйста, начните процесс заново.")
+
+    # Удаляем клавиатуру после обработки
+    await callback.message.edit_reply_markup(reply_markup=None)
 
 
 

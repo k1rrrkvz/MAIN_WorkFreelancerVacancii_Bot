@@ -11,7 +11,7 @@ def defShowBotUserMenu():
 
 def defShowBotAdminMenu():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Выбрать id", callback_data="profile"),
+        [InlineKeyboardButton(text="Профиль пользователя", callback_data="u_profile"),
          InlineKeyboardButton(text="Выдать подписку", callback_data="subscribe")]
     ]
                                 )
