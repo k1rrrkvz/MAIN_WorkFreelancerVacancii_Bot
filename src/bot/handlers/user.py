@@ -1,15 +1,21 @@
 import os
 from aiogram.filters import Command, CommandStart
+
 from aiogram.types import Message
 
-from aiogram import types
-from loader import dp
+from aiogram import types, F
+from aiogram.types import CallbackQuery
+from loader import dp, bot
 
 from keyboards.inline import menu   
 
 from database.db import add_user, get_user_data, update_trial_plan_for_user, calculate_remaining_time, get_user_time_registration, is_trial_plan_active, get_user_row_number
 from keyboards.reply import cmd_b
 #from handlers.admin import admin_panel
+
+
+
+
 
 
 @dp.message(CommandStart())
@@ -85,6 +91,22 @@ async def infor(message: types.Message):
     else:
         await message.reply('Вы не являетесь админом.', reply_markup=menu.defShowBotUserMenu())
 
+
+
+
+
+@dp.callback_query(F.data == 'subscribe')
+async def twenty_seven(callback: CallbackQuery):
+    await callback.answer('Введите ключи')
+    await callback.message.answer(f'Выберите user ID', reply_markup=menu.defShowBotAdminMenu())
+
+
+#========
+""" @dp.callback_query_handler(Text(startswith='subscribe'))
+async def rSub(call: types.CallbackQuery):
+    await call.answer()
+    await call.message.delete()
+    await bot.send_message(call.from_user.id, f'Выберите user ID', reply_markup=menu.defShowBotAdminMenu()) """
 
 @dp.message()
 async def echo(message: types.Message):
