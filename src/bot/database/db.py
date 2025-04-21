@@ -150,8 +150,12 @@ def setSubFor_3_days(user_id):
     try:
         cursor.execute("""
             UPDATE Users 
+            SET trial_plan = 0
             SET t1 = 1
-            WHERE user_id = ?
+            SET t2 = 0
+            SET t3 = 0
+            SET t4 = 0
+WHERE user_id = ?
         """, (user_id,))
         
         conn.commit()
@@ -172,8 +176,13 @@ def setSubFor_7_days(user_id):
     
     try:
         cursor.execute("""
-            UPDATE Users 
+            UPDATE Users
+            SET trial_plan = 0
+            SET t1 = 0
             SET t2 = 1
+            SET t3 = 0
+            SET t4 = 0                       
+            
             WHERE user_id = ?
         """, (user_id,))
         
@@ -195,8 +204,13 @@ def setSubFor_30_days(user_id):
     
     try:
         cursor.execute("""
-            UPDATE Users 
+            UPDATE Users
+            SET trial_plan = 0
+            SET t1 = 0
+            SET t2 = 0
             SET t3 = 1
+            SET t4 = 0
+            
             WHERE user_id = ?
         """, (user_id,))
         

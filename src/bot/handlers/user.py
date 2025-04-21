@@ -15,8 +15,8 @@ from loader import dp, bot
 
 from keyboards.inline import menu   
 
-from database.db import add_user, get_user_data, update_trial_plan_for_user, calculate_remaining_time, get_user_time_registration, is_trial_plan_active, get_user_row_number, setSubFor_3_days
-from keyboards.reply import cmd_b
+from database.db import add_user, get_user_data, update_trial_plan_for_user, calculate_remaining_time, get_user_time_registration, is_trial_plan_active, get_user_row_number, setSubFor_3_days, setSubFor_7_days, setSubFor_30_days, setSubFor_365_days
+#from keyboards.reply import cmd_b
 #from handlers.admin import admin_panel
 
 # Определяем группу состояний
@@ -35,7 +35,8 @@ async def start(message: Message):
         await message.answer("Добро пожаловать в бот Meow Фриланс!😻\n\n"
                              "🚀 Найдите клиентов быстро, удобно и просто!\n\n"
                              "Для получения дополнительной информации напишите /help.\n\n"
-                            "Для выхода в личный кабинет напишите /me")
+                            "Для выхода в личный кабинет напишите /me\n\n" \
+                            "/sudo - админ панель (требуются права)")
         
         await message.answer("❕️ Нажмите /Vacancies, чтобы начать получать вакансии")
 
@@ -63,7 +64,8 @@ async def start(message: Message):
     await message.answer("Список команд:\n\n"
                              "/start - начать\n\n"
                              "/me - личный кабинет\n\n"
-                             "/Vacancies - команда для получения вакансий")
+                             "/Vacancies - команда для получения вакансий\n\n"
+                             "/sudo - админ панель (требуются права)")
 
 
 
@@ -176,7 +178,9 @@ async def process_message(message: types.Message, state: FSMContext):
     elif message.reply_to_message and "Пожалуйста, перешлите сообщение" in message.reply_to_message.text:
         await message.answer("Пожалуйста, перешлите сообщение от пользователя, а не отправляйте обычный текст.")
         
+# Установка подписки для пользователя
 
+# Подписка на 3 дня
 @dp.callback_query(lambda c: c.data == '3_days')
 async def handle_3_days_subscription(callback: types.CallbackQuery, state: FSMContext):
     # Получаем сохраненный ID пользователя из состояния
@@ -186,6 +190,85 @@ async def handle_3_days_subscription(callback: types.CallbackQuery, state: FSMCo
     if user_id:
         # Вызываем функцию для установки подписки
         result = setSubFor_3_days(user_id)
+        
+        # Отправляем мгновенное уведомление пользователю
+        await callback.answer("Подписка обновлена", show_alert=True)
+        
+        # Отправляем подробный результат в чат
+        await callback.message.answer(result)
+        
+        # Сбрасываем состояние
+        await state.clear()
+    else:
+        await callback.answer("Ошибка: ID пользователя не найден", show_alert=True)
+        await callback.message.answer("Пожалуйста, начните процесс заново.")
+
+    # Удаляем клавиатуру после обработки
+    await callback.message.edit_reply_markup(reply_markup=None)
+
+
+# Подписка на 7 дней
+@dp.callback_query(lambda c: c.data == '7_days')
+async def handle_7_days_subscription(callback: types.CallbackQuery, state: FSMContext):
+    # Получаем сохраненный ID пользователя из состояния
+    data = await state.get_data()
+    user_id = data.get('user_id')
+    
+    if user_id:
+        # Вызываем функцию для установки подписки
+        result = setSubFor_7_days(user_id)
+        
+        # Отправляем мгновенное уведомление пользователю
+        await callback.answer("Подписка обновлена", show_alert=True)
+        
+        # Отправляем подробный результат в чат
+        await callback.message.answer(result)
+        
+        # Сбрасываем состояние
+        await state.clear()
+    else:
+        await callback.answer("Ошибка: ID пользователя не найден", show_alert=True)
+        await callback.message.answer("Пожалуйста, начните процесс заново.")
+
+    # Удаляем клавиатуру после обработки
+    await callback.message.edit_reply_markup(reply_markup=None)
+
+# Подписка на 30 дней
+@dp.callback_query(lambda c: c.data == '30_days')
+async def handle_30_days_subscription(callback: types.CallbackQuery, state: FSMContext):
+    # Получаем сохраненный ID пользователя из состояния
+    data = await state.get_data()
+    user_id = data.get('user_id')
+    
+    if user_id:
+        # Вызываем функцию для установки подписки
+        result = setSubFor_30_days(user_id)
+        
+        # Отправляем мгновенное уведомление пользователю
+        await callback.answer("Подписка обновлена", show_alert=True)
+        
+        # Отправляем подробный результат в чат
+        await callback.message.answer(result)
+        
+        # Сбрасываем состояние
+        await state.clear()
+    else:
+        await callback.answer("Ошибка: ID пользователя не найден", show_alert=True)
+        await callback.message.answer("Пожалуйста, начните процесс заново.")
+
+    # Удаляем клавиатуру после обработки
+    await callback.message.edit_reply_markup(reply_markup=None)
+
+# Подписка на 365 дней
+@dp.callback_query(lambda c: c.data == '365_days')
+async def handle_365_days_subscription(callback: types.CallbackQuery, state: FSMContext):
+    # Получаем сохраненный ID пользователя из состояния
+    data = await state.get_data()
+    user_id = data.get('user_id')
+    
+    if user_id:
+        # Вызываем функцию для установки подписки
+        result = setSubFor_365_days(user_id)
         
         # Отправляем мгновенное уведомление пользователю
         await callback.answer("Подписка обновлена", show_alert=True)
