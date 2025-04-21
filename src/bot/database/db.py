@@ -1,5 +1,3 @@
-# db.py
-
 import datetime
 import os
 from dotenv import load_dotenv
@@ -13,8 +11,17 @@ ADMIN_ID = os.environ.get('adminID')
 # Глобальная переменная для хранения номера строки пользователя
 u_line = None
 
+# Функция для проверки наличия файла базы данных и создания его, если он отсутствует
+def check_and_create_db_file():
+    db_path = "src\\data\\users.db"
+    if not os.path.exists(db_path):
+        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+        with open(db_path, 'w'):
+            pass  
+
 # Подключение к базе данных
 def connect_db():
+    check_and_create_db_file()  # Проверяем наличие файла базы данных и создаем его, если нужно
     return sqlite3.connect("src\\data\\users.db")
 
 # Функция создания таблицы (если не создана)
@@ -42,6 +49,8 @@ def create_table():
     
     conn.commit()
     conn.close()
+
+# Вызываем функцию создания таблицы один раз при импорте модуля
 create_table()
 
 # Функция добавления пользователя
@@ -171,7 +180,7 @@ def setSubFor_7_days(user_id):
         conn.commit()
         
         if cursor.rowcount > 0:
-            return f"Подписка на 3 дня успешно установлена для пользователя {user_id}"
+            return f"Подписка на 7 дней успешно установлена для пользователя {user_id}"
         else:
             return f"Пользователь с ID {user_id} не найден"
     
@@ -194,7 +203,7 @@ def setSubFor_30_days(user_id):
         conn.commit()
         
         if cursor.rowcount > 0:
-            return f"Подписка на 3 дня успешно установлена для пользователя {user_id}"
+            return f"Подписка на 30 дней успешно установлена для пользователя {user_id}"
         else:
             return f"Пользователь с ID {user_id} не найден"
     
@@ -210,14 +219,14 @@ def setSubFor_365_days(user_id):
     try:
         cursor.execute("""
             UPDATE Users 
-            SET t3 = 1
+            SET t4 = 1
             WHERE user_id = ?
         """, (user_id,))
         
         conn.commit()
         
         if cursor.rowcount > 0:
-            return f"Подписка на 3 дня успешно установлена для пользователя {user_id}"
+            return f"Подписка на 365 дней успешно установлена для пользователя {user_id}"
         else:
             return f"Пользователь с ID {user_id} не найден"
     
