@@ -150,20 +150,19 @@ def setSubFor_3_days(user_id):
     try:
         cursor.execute("""
             UPDATE Users 
-            SET trial_plan = 0
-            SET t1 = 1
-            SET t2 = 0
-            SET t3 = 0
-            SET t4 = 0
+            SET trial_plan = 0, t1 = 1, t2 = 0, t3 = 0, t4 = 0
 WHERE user_id = ?
         """, (user_id,))
         
         conn.commit()
         
         if cursor.rowcount > 0:
-            return f"Подписка на 3 дня успешно установлена для пользователя {user_id}"
+            return f"""Подписка на 3 дня успешно установлена для пользователя {user_id}\n\n
+                        """
+        
         else:
             return f"Пользователь с ID {user_id} не найден"
+    
     
     finally:
         conn.close()
@@ -177,11 +176,7 @@ def setSubFor_7_days(user_id):
     try:
         cursor.execute("""
             UPDATE Users
-            SET trial_plan = 0
-            SET t1 = 0
-            SET t2 = 1
-            SET t3 = 0
-            SET t4 = 0                       
+            SET trial_plan = 0, t1 = 0, t2 = 1, t3 = 0, t4 = 0               
             
             WHERE user_id = ?
         """, (user_id,))
@@ -205,11 +200,7 @@ def setSubFor_30_days(user_id):
     try:
         cursor.execute("""
             UPDATE Users
-            SET trial_plan = 0
-            SET t1 = 0
-            SET t2 = 0
-            SET t3 = 1
-            SET t4 = 0
+            SET trial_plan = 0, t1 = 0, t2 = 0, t3 = 1, t4 = 0
             
             WHERE user_id = ?
         """, (user_id,))
@@ -233,7 +224,7 @@ def setSubFor_365_days(user_id):
     try:
         cursor.execute("""
             UPDATE Users 
-            SET t4 = 1
+            SET trial_plan = 0, t1 = 0, t2 = 0, t3 = 0, t4 = 1
             WHERE user_id = ?
         """, (user_id,))
         
